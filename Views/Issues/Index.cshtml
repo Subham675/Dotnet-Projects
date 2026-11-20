@@ -1,0 +1,58 @@
+﻿@model IEnumerable<Issue_tracker.Models.Issue>
+@using Issue_tracker.Models;
+@{
+    ViewData["Title"] = "Issues";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Issues</h2>
+    <a asp-action="Create" class="btn btn-primary">+ New Issue</a>
+</div>
+<form method="get" class="d-flex gap-2 mb-3">
+    <input type="text" name="search" value="@ViewBag.Search" class="form-control w-auto" placeholder="Search title..." />
+    <select name="status" asp-items="Html.GetEnumSelectList<Status>()" class="form-select w-auto">
+        <option value="">All statuses</option>
+    </select>
+    <button type="submit" class="btn btn-outline-primary">Filter</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+</form>
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Project</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Assignee</th>
+            <th class="text-end">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td><a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none fw-semibold">@item.Title</a></td>
+                <td>@item.Description</td>
+                <td>@item.Project.Name</td>
+                <td>@item.Priority</td>
+                <td>@item.Status</td>
+                <td>@(item.Assignee?.Name ?? "Unassigned")</td>
+                <td class="text-end">
+                    @* <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none fw-semibold">@item.Title</a> *@
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
+                          onsubmit="return confirm('Delete this issue?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No issues yet.</p>
+}

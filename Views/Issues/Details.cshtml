@@ -1,0 +1,73 @@
+﻿@using Issue_tracker.Models
+@model Issue
+@{
+    ViewData["Title"] = "Issue Details";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card form-card">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <span class="text-muted">#@Model.Id · @Model.Project.Name</span>
+                        <h2 class="page-title mb-0">@Model.Title</h2>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary">@Model.Status</span>
+                        <span class="badge bg-warning text-dark">@Model.Priority</span>
+                    </div>
+                </div>
+
+                <h6 class="fw-semibold">Description</h6>
+                <p>@(string.IsNullOrEmpty(Model.Description) ? "No description" : Model.Description)</p>
+
+                <hr />
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-muted small">Reporter</div>
+                        <div class="fw-semibold">@Model.Reporter.Name</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted small">Assignee</div>
+                        <div class="fw-semibold">@(Model.Assignee?.Name ?? "Unassigned")</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted small">Created</div>
+                        <div class="fw-semibold">@Model.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
+                </div>
+                <form asp-action="ChangeStatus" asp-route-id="@Model.Id" method="post" class="d-flex gap-2 mt-3">
+                    <select name="status" asp-items="Html.GetEnumSelectList<Status>()" class="form-select w-auto"></select>
+                    <button type="submit" class="btn btn-outline-primary">Change status</button>
+                </form>
+                <hr />
+                <h5>Comments (@Model.Comments.Count)</h5>
+                <form asp-action="AddComment" method="post" class="mb-3">
+                    <input type="hidden" name="issueId" value="@Model.Id" />
+                    <textarea name="text" class="form-control mb-2" rows="2" placeholder="Write a comment..." required></textarea>
+                    <button type="submit" class="btn btn-primary btn-sm">Post comment</button>
+                </form>
+                @foreach (var c in Model.Comments.OrderBy(c => c.CreatedAt))
+                {
+                    <div class="mb-2 p-3 bg-light rounded">
+                        <strong>@c.Author.Name</strong>
+                        <small class="text-muted">@c.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small>
+                        <div>@c.Text</div>
+                        <form asp-action="DeleteComment" asp-route-id="@c.Id" method="post" class="mt-1"
+                              onsubmit="return confirm('Delete this comment?');">
+                            <input type="hidden" name="issueId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
